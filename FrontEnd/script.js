@@ -1,82 +1,41 @@
-//Sélection de la div galerie
+// Sélection de la galerie dans le HTML
 const gallery = document.querySelector(".gallery");
 
-//Sélection du conteneur de filtres
-const filters = document.querySelector(".filters");
+// Fonction principale qui démarre tout
+async function init() {
 
-//Récupération des projets depuis le back-end
-fetch("http://localhost:5678/api/works")
-  .then(response => response.json())
-  .then(galerieProjets => {
+    // 1. Récupérer les projets depuis l'API
+    const projets = await fetch("http://localhost:5678/api/works")
+        .then(response => response.json());
 
-    // Affichage initial des projets
-    displayProjects(galerieProjets);
-
-    // Récupération des catégories pour créer les filtres
-    fetch("http://localhost:5678/api/categories")
-      .then(res => res.json())
-      .then(categories => {
-        displayFilters(categories, galerieProjets);
-      });
-  })
-  .catch(error => console.error("Erreur :", error));
-
-
-//Fonction pour afficher les projets dans la galerie
-function displayProjects(galerieProjets) {
-  gallery.innerHTML = ""; // vide la galerie avant d'ajouter
-
-  galerieProjets.forEach(projet => {
-    const figure = document.createElement("figure");
-    figure.dataset.categoryId = projet.categoryId; // relie le projet à sa catégorie
-
-    const img = document.createElement("img");
-    img.src = projet.imageUrl;
-    img.alt = projet.title;
-
-    const figcaption = document.createElement("figcaption");
-    figcaption.textContent = projet.title;
-
-    figure.appendChild(img);
-    figure.appendChild(figcaption);
-    gallery.appendChild(figure);
-  });
+    // 2. Afficher les projets dans le DOM
+    displayProjects(projets);
 }
 
+// Fonction d’affichage des projets
+function displayProjects(listeDeProjets) {
 
-//Fonction pour créer les boutons de filtre
-function displayFilters(categories, galerieProjets) {
-  filters.innerHTML = ""; // vide les anciens boutons
+    gallery.innerHTML = ""; // on vide la galerie
 
-  // Bouton "Tous"
-  const allButton = document.createElement("button");
-  allButton.textContent = "Tous";
-  allButton.dataset.id = 0; // 0 = toutes les catégories
-  allButton.addEventListener("click", () => filterProjects(0));
-  filters.appendChild(allButton);
+    listeDeProjets.forEach(projet => {
 
-  // Boutons pour chaque catégorie
-  categories.forEach(category => {
-    const button = document.createElement("button");
-    button.textContent = category.name;
-    button.dataset.id = category.id;
-    button.addEventListener("click", () => filterProjects(category.id));
-    filters.appendChild(button);
-  });
+        // Création des éléments
+        const figure = document.createElement("figure");
+
+        const img = document.createElement("img");
+        img.src = projet.imageUrl;
+        img.alt = projet.title;
+
+        const caption = document.createElement("figcaption");
+        caption.textContent = projet.title;
+
+        // Construction
+        figure.appendChild(img);
+        figure.appendChild(caption);
+
+        gallery.appendChild(figure);
+    });
 }
 
-
-//Fonction pour filtrer les projets
-function filterProjects(categoryId) {
-  const allProjects = document.querySelectorAll(".gallery figure");
-
-  allProjects.forEach(project => {
-    const projectCategoryId = parseInt(project.dataset.categoryId);
-
-    if (categoryId === 0 || projectCategoryId === categoryId) {
-      project.style.display = "block"; // on affiche
-    } else {
-      project.style.display = "none";  // on cache
-    }
-  });
-}
+// Lancement de init()
+init();
