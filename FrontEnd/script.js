@@ -6,12 +6,13 @@ const gallery = document.querySelector(".gallery");
 async function getWorks() {
 
     // 1. Récupérer les projets depuis l'API
-    const projets = await fetch("http://localhost:5678/api/works")
-        .then(response => response.json());
+    const response = await fetch("http://localhost:5678/api/works");
+    const projets = await response.json();
         // fetch envoie une requête à l'API pour récupérer tous les projets
         // .then(response => response.json()) transforme la réponse JSON en tableau d'objets JavaScript
 
     // 2. Afficher les projets dans le DOM
+    allProjects = projets; // on garde tous les projets en mémoire
     displayProjects(projets);
      // On appelle la fonction displayProjects pour créer les éléments HTML et les ajouter à la galerie}
 }
@@ -44,9 +45,6 @@ function displayProjects(listeDeProjets) {
         gallery.appendChild(figure);
     });
 }
-
-// Lancement de la récupération des projets
-getWorks();
 
 
 // Sélection des filtres dans le HTML
@@ -94,26 +92,70 @@ function displayBouton (categories){
     })
 }
 
-
 // Fonction pour filtrer les projets affichés
 
 function filterProjects(categoryId) {
-    const allFigures = document.querySelectorAll(".gallery figure");
-     // récupère tous les projets affichés dans la galerie
 
-    allFigures.forEach(projet => {
-        const idCategorie = parseInt(projet.dataset.categoryId);
-        // récupère l'id de catégorie du projet depuis le DOM
+    // Cas 1 : bouton "Tous"
+    if (categoryId === 0) {
+        displayProjects(allProjects);
+        return;
+    }
 
-        if (categoryId === 0 || idCategorie === categoryId) {
-            projet.style.display = "block"; // si la catégorie correspond ou "Tous", on affiche
-        } else {
-            projet.style.display = "none"; // sinon on cache
-        }
+    // Cas 2 : filtrer par catégorie
+    const projetsFiltres = allProjects.filter(projet => {
+        return projet.categoryId === categoryId;
     });
+
+    // Afficher uniquement les projets filtrés
+    displayProjects(projetsFiltres);
 }
+
 // Lancer le programme
 
 getWorks();
 
 // on rappelle getWorks() pour s'assurer que les projets s'affichent au chargement
+
+
+// Vérifier si l'utilisateur est connecté
+//localStorage = mémoie du navigateur // "token" le nom sous lequel on a sauvegarder le token 
+// cette ligne récupère le token s’il existe sinon elle renvoie null
+// token = clé secrete donnée par le serveur quand l'utilisateur se connecte 
+const token = localStorage.getItem("token");
+
+// si token existe => l'utilisateur est connecte si le token n'existe pas on ne fait rien 
+if (token) {
+    // 1. Cacher les filtres
+    //on cherche la div qui contient les boutons de filtres
+    const filters = document.querySelector(".filters");
+
+    if (filters) { //on vérifie que la div existe 
+        filters.style.display = "none"; // on cache les filtres, en mode admin les filtres ne doivent pas s'afficher
+    }
+
+    // 2. Changer "login" en "logout"
+    const loginLink = document.querySelector('a[href="login.html"]'); //selection du lien qui méne à lapage login
+    if (loginLink) { // on vérifie qu'il existe 
+        loginLink.textContent = "logout"; // on change le texte du lien, l'utilisateur voit maintenant logout
+
+        // 3. Gérer la déconnexion
+        loginLink.addEventListener("click", (event) => { //on écoute le clic sur logout
+            event.preventDefault(); // empêce d'aller sur la page login 
+            localStorage.removeItem("token"); // suppression du token, l'utilisateur est déconnecté 
+            window.location.reload(); // on recharge la page, il n'y a plus de token donc les filtres reviennent, logout redevient login le mode édition disparait
+        });
+    }
+
+    // 4. Afficher le bandeau "mode édition"
+    const header = document.querySelector("header"); //on récupère le header du site 
+
+    const editBanner = document.createElement("div"); //on crée une nouvelle div
+    editBanner.textContent = "Mode édition"; //Texte affiché 
+    editBanner.style.backgroundColor = "black"; //fond noir
+    editBanner.style.color = "white"; //texte blanc
+    editBanner.style.textAlign = "center"; //centré
+    editBanner.style.padding = "10px";
+
+    document.body.insertBefore(editBanner, header); //On place le bandeau au-dessus du header
+}

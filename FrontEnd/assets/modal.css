@@ -1,0 +1,115 @@
+/* =============================
+   1. Overlay : fond sombre
+   ============================= */
+.modal-overlay {
+    position: fixed; /* reste fixé à l’écran */
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0.5); /* fond semi-transparent */
+    display: flex; /* pour centrer le contenu */
+    justify-content: center;
+    align-items: center;
+    z-index: 1000; /* au-dessus de tout le reste */
+}
+
+/* =============================
+   2. Contenu de la modale
+   ============================= */
+.modal-content {
+    background-color: white;
+    padding: 20px;
+    width: 90%;
+    max-width: 600px;
+    border-radius: 10px;
+    position: relative; /* pour positionner le bouton fermer */
+    max-height: 90vh; /* pour ne pas dépasser l’écran */
+    overflow-y: auto; /* scroll si trop grand */
+}
+
+/* =============================
+   3. Bouton fermer
+   ============================= */
+.modal-close {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    border: none;
+    background: none;
+    font-size: 1.5em;
+    cursor: pointer;
+}
+
+/* =============================
+   4. Zones de contenu
+   ============================= */
+.modal-zone {
+    display: flex;
+    flex-direction: column;
+}
+
+.modal-gallery {
+    gap: 10px;
+}
+
+.modal-gallery-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.modal-gallery-list figure {
+    position: relative;
+    width: 100px;
+}
+
+.modal-gallery-list img {
+    width: 100%;
+    border-radius: 5px;
+}
+
+.modal-gallery-list button {
+    position: absolute;
+    top: 0;
+    right: 0;
+    background: rgba(255,0,0,0.8);
+    color: white;
+    border: none;
+    border-radius: 50%;
+    cursor: pointer;
+}
+
+/* =============================
+   5. Formulaire
+   ============================= */
+.modal-form {
+    display: none; /* caché par défaut */
+    flex-direction: column;
+    gap: 10px;
+}
+
+.modal-form input, .modal-form select {
+    padding: 10px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+}
+
+.modal-form button[type="submit"] {
+    background-color: #1D6154;
+    color: white;
+    font-weight: bold;
+    border: none;
+    padding: 10px;
+    border-radius: 50px;
+    cursor: pointer;
+}
+
+.modal-back {
+    align-self: flex-start;
+    margin-bottom: 10px;
+    background: none;
+    border: none;
+    font-size: 1em;
+    cursor: pointer;
+}

@@ -95,6 +95,20 @@ nav li {
 	font-size: 1.2em;
 }
 
+/* modification en plus pour la page login */
+nav a {
+	text-decoration: none; /* enlève la barre en dessous */
+	color: inherit; /* prend la couleur du texte parent */
+	font-weight: bold;
+}
+
+section a{
+	display: flex;
+	justify-content: center ;
+
+}
+/* fin de la modification en plus pour la page login */
+
 li:hover {
 	color: #B1663C;
 }
