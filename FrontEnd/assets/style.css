@@ -107,6 +107,31 @@ section a{
 	justify-content: center ;
 
 }
+.filters{
+	display: flex;
+	justify-content: center;
+	gap: 10px;
+	margin-bottom: 30px;
+}
+.filters button {
+    padding: 8px 16px;
+    border: 1px solid #1D6154;
+    border-radius: 20px;
+    background-color: white;
+    color: #1D6154;
+    font-family: "Syne";
+    font-size: 16px;
+    cursor: pointer;
+}
+
+/* Bouton actif */
+.filters button.active {
+    background-color: #1D6154;
+    color: white;
+}
+.btn-modifier {
+    display: none;
+}
 /* fin de la modification en plus pour la page login */
 
 li:hover {

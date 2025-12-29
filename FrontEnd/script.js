@@ -27,6 +27,7 @@ function displayProjects(listeDeProjets) {
         // Création des éléments
         const figure = document.createElement("figure");
         figure.dataset.categoryId = projet.categoryId; 
+        figure.dataset.id = projet.id; //pour la suppression (étape 7)
         // On stocke l'id de la catégorie dans l'attribut data-category-id
         // Cela servira pour le filtrage plus tard
 
@@ -69,11 +70,13 @@ function displayBouton (categories){
     //creation du bouton tous 
     const btnTous = document.createElement("button");
     btnTous.textContent = "tous";
+    btnTous.classList.add("active"); // actif par défaut
     filters.appendChild(btnTous); // on ajoute le bouton à la div des filtres
 
     //Ajouter le clic pour afficher tous le projet
      btnTous.addEventListener("click", () => {
-        filterProjects(0); // // 0 signifie "afficher tous les projets"
+        setActiveButton(btnTous);
+        filterProjects(0); // // 0 signifie "afficher tous les projets" 
     });
 
 
@@ -90,6 +93,16 @@ function displayBouton (categories){
         });
        
     })
+}
+function setActiveButton(activeButton) { //on crée une foncton, activeButton : le bouto sur lequel l’utilisateur vient de cliquer
+    const buttons = document.querySelectorAll(".filters button");//On sélectionne tous les boutons qui se trouvent dans la div .filters
+    //querySelectorAll retourne une liste de boutons (Tous, Objets, Appartements, etc.)
+
+    buttons.forEach(button => { //On parcourt chaque bouton, un par un, button représente un bouton à la fois
+        button.classList.remove("active");//On enlève la classe active à tous les boutons,Ça permet de s’assurer qu’aucun bouton n’est actif avant d’en choisir un nouveau
+    });
+
+    activeButton.classList.add("active");//Ça permet de s’assurer qu’aucun bouton n’est actif avant d’en choisir un nouveau,Ce bouton devient visuellement sélectionné (fond vert, texte blanc)
 }
 
 // Fonction pour filtrer les projets affichés
@@ -158,4 +171,9 @@ if (token) {
     editBanner.style.padding = "10px";
 
     document.body.insertBefore(editBanner, header); //On place le bandeau au-dessus du header
+    // 5. AFFICHER LE BOUTON "MODIFIER"
+    const editButton = document.querySelector(".btn-modifier");
+    if (editButton) {
+        editButton.style.display = "block";
+    }
 }
