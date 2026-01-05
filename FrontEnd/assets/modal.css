@@ -2,30 +2,29 @@
    1. Overlay : fond sombre
    ============================= */
 .modal-overlay {
-    position: fixed; /* reste fixé à l’écran */
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0,0,0,0.5); /* fond semi-transparent */
-    display: flex; /* pour centrer le contenu */
-    justify-content: center;
-    align-items: center;
-    z-index: 1000; /* au-dessus de tout le reste */
+    display: none;
+    position: fixed;
+    inset: 0;
+    background-color: rgba(0,0,0,0.3);
+    z-index: 1000;
+}
+.modal-overlay.active {
+    display: flex;
 }
 
 /* =============================
    2. Contenu de la modale
    ============================= */
 .modal-content {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+
+    width: 630px;
     background-color: white;
-    padding: 20px;
-    width: 90%;
-    max-width: 600px;
+    padding: 40px;
     border-radius: 10px;
-    position: relative; /* pour positionner le bouton fermer */
-    max-height: 90vh; /* pour ne pas dépasser l’écran */
-    overflow-y: auto; /* scroll si trop grand */
 }
 
 /* =============================
@@ -33,11 +32,11 @@
    ============================= */
 .modal-close {
     position: absolute;
-    top: 10px;
-    right: 10px;
+    top: 5px;
+    right: 5px;
     border: none;
     background: none;
-    font-size: 1.5em;
+    font-size: 0.5em;
     cursor: pointer;
 }
 
@@ -47,46 +46,101 @@
 .modal-zone {
     display: flex;
     flex-direction: column;
+    align-items: center;
+}
+
+.modal-zone h3 {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 20px;
 }
 
 .modal-gallery {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
     gap: 10px;
+    background-color: white;
+    padding: 50px;
+    border-radius: 10px;
+}
+
+.modal-gallery h3 {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 30px;
+    font-size: 26px;      /* ← taille du titre */
 }
 
 .modal-gallery-list {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
+    display: grid;
+    grid-template-columns: repeat(5, 80px);
+    gap: 15px;
+    justify-content: center;
+    border-bottom: 1px solid #B3B3B3;
+    padding-bottom: 60px;
 }
-
-.modal-gallery-list figure {
+.modal-item {
     position: relative;
-    width: 100px;
+    width: 80px;
 }
 
-.modal-gallery-list img {
+.modal-item img {
     width: 100%;
-    border-radius: 5px;
+    height: auto;
+}
+.delete-btn img {
+    width: 11px;
+    height: 11px;
+    filter: invert(1);
 }
 
-.modal-gallery-list button {
+.modal-item button {
     position: absolute;
-    top: 0;
-    right: 0;
-    background: rgba(255,0,0,0.8);
-    color: white;
+    top: 5px;
+    right: 5px;
+
+    width: 20px;
+    height: 20px;
+
+    background-color: black;
     border: none;
-    border-radius: 50%;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
     cursor: pointer;
 }
+.modal-item button i {
+    color: white;        /* ← poubelle blanche */
+    font-size: 11px;     /* ← taille maquette */
+    line-height: 1;
+}
+
+.modal-show-form{
+    margin: 40px auto 0 auto; /* ← centre horizontalement */
+    display: block;
+
+    border-radius: 60px;
+    background-color: #1D6154;
+    color: white;
+    width: 180px;
+    padding: 8px;
+    border: none;
+    cursor: pointer;
+}
+
 
 /* =============================
    5. Formulaire
    ============================= */
 .modal-form {
     display: none; /* caché par défaut */
+    width: 100%;
     flex-direction: column;
     gap: 10px;
+    background-color: white;
 }
 
 .modal-form input, .modal-form select {
@@ -111,5 +165,138 @@
     background: none;
     border: none;
     font-size: 1em;
+    cursor: pointer;
+    position: absolute;
+    top: 5px;
+    left: 5px;
+}
+
+.h2btnmodif{
+    display: flex;
+    justify-content: center;
+    gap: 30px;
+    align-items: baseline;
+}
+.btn-modifier{
+    background: none;      /* pas de fond */
+    border: none;          /* pas de bordure */
+    padding: 0;
+
+    display: flex;
+    align-items: center;
+    gap: 8px;              /* espace icône / texte */
+
+    font-family: 'Work Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 400;
+    color: black;
+
+    cursor: pointer;
+}
+.btn-modifier i {
+    font-size: 14px;
+}
+.btn-modifier:hover {
+    opacity: 0.7;
+}
+
+/* ===== Formulaire ajout photo ===== */
+
+.add-photo-form {
+    width: 420px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    
+}
+
+/* Zone upload */
+.upload-zone {
+    background-color: #E8F1F6;
+    border-radius: 3px;
+    height: 170px;
+    width: 100%;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+
+    overflow: hidden;
+}
+
+.upload-zone img {
+    height: 100%;
+    object-fit: cover;
+}
+
+.upload-zone.has-image i,
+.upload-zone.has-image .upload-btn,
+.upload-zone.has-image .upload-info {
+    display: none;
+}
+
+.upload-zone i {
+    font-size: 60px;
+    color: #B9C5CC;
+    margin-bottom: 10px;
+}
+
+.upload-btn {
+    display: inline-block;
+    background-color: #CBD6DC;
+    color: #306685;
+    padding: 8px 15px;
+    border-radius: 50px;
+    font-weight: 500;
+    cursor: pointer;
+    margin: 10px 0;
+    width: 40%;
+    display: flex;
+    justify-content: center;
+}
+
+.upload-info {
+    font-size: 12px;
+    color: #444;
+}
+
+/* Champs */
+.add-photo-form label {
+    font-size: 14px;
+}
+
+.add-photo-form input,
+.add-photo-form select {
+    height: 40px;
+    border-radius: 3px;
+    border: 1px solid #ccc;
+    padding: 0 10px;
+}
+
+/* Séparateur */
+.add-photo-form hr {
+    border: none;
+    border-top: 1px solid #B3B3B3;
+    margin: 20px 0 10px;
+}
+
+/* Bouton Valider */
+.submit-btn {
+    width: 180px;
+    margin: 0 auto;
+
+    background-color: #A7A7A7;
+    color: white;
+    border: none;
+    border-radius: 50px;
+    height: 36px;
+
+    cursor: not-allowed;
+}
+
+.submit-btn:not(:disabled) {
+    background-color: #1D6154;
     cursor: pointer;
 }

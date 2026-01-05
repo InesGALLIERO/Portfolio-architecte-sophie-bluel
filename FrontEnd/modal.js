@@ -14,16 +14,10 @@ const backBtn = document.querySelector(".modal-back"); // flèche retour vers la
 // Fonctions pour ouvrir/fermer/bascule
 // ------------------------
 
-// Ouvrir la modale
-function openModal() { //Fonction appemée quand on clique sur Modifier 
-    modalOverlay.style.display = "block"; // rendre la modale visible
-    gallerySection.style.display = "block"; // afficher la galerie par defaut
-    formSection.style.display = "none"; // cacher le formulaire
-}
-
 // Fermer la modale
 function closeModal() { //fonction pour fermer la modale 
     modalOverlay.style.display = "none"; // cacher la modale (fond sombre + modale)
+    modalOverlay.classList.remove("active");
 }
 
 // Afficher le formulaire et cacher la galerie
@@ -91,9 +85,13 @@ function displayModalWorks(works) { //On crée une fonction, works est la liste 
         img.src = work.imageUrl;//On met l'image du projet dedans
         img.alt = work.title;//Texte alternatif(accessibilité)
 
-        const deleteBtn = document.createElement("button");//On crée un bouton
-        deleteBtn.textContent = "🗑️";//Le bouton affiche une poubelle 
-        deleteBtn.classList.add("delete-btn");//Classe CSS pour styliser le bouton
+        const deleteBtn = document.createElement("button");
+        deleteBtn.classList.add("delete-btn");
+
+       const icon = document.createElement("i");
+        icon.classList.add("fa-solid", "fa-trash-can");
+
+        deleteBtn.appendChild(icon);
 
         // clic sur la poubelle
         deleteBtn.addEventListener("click", () => { //On écoute le clic sur la poubelle
@@ -178,26 +176,13 @@ function removeFromMainGallery(workId) {
 }
 // 5. Charger la modale quand elle s’ouvre
 function openModal() {
-    // On crée une fonction openModal
-    // Son rôle : ouvrir la fenêtre modale
-
-    modalOverlay.style.display = "block";
-    // On affiche le fond sombre + la modale
-    // "block" = visible à l’écran
+   modalOverlay.style.display = "block";
+    modalOverlay.classList.add("active");
 
     gallerySection.style.display = "block";
-    // On affiche la partie "galerie" de la modale
-    // (celle avec les projets et les poubelles)
-
     formSection.style.display = "none";
-    // On cache la partie "formulaire"
-    // (celle pour ajouter un nouveau projet)
 
-    loadModalWorks(); // ← très important
-    // On appelle la fonction loadModalWorks
-    // Elle va :
-    // 1. Récupérer les projets depuis l’API
-    // 2. Les afficher dans la modale
+    loadModalWorks();
 }
 
 //étape 8 ajout d'un projet
@@ -211,10 +196,7 @@ const titleInput = form.querySelector('input[name="title"]');
 // Champ pour le titre du projet
 const categorySelect = form.querySelector('select[name="category"]'); 
 // Liste déroulante des catégories
-const previewContainer = document.createElement("div"); 
-// Div qui contiendra la preview de l’image
-imageInput.parentNode.insertBefore(previewContainer, imageInput.nextSibling);
-// On place la preview juste après le champ image
+
 
 // Récupérer les catégories depuis l'API 
 function loadCategories() { //Cette fonction sert à récupérer la liste des catégories
@@ -235,23 +217,26 @@ loadCategories();// On appelle la fonction pour charger les catégories dès le 
 
 // Preview de l’image sélectionnée
 // ------------------------
-imageInput.addEventListener("change", () => {// On écoute le changement sur le champ "image"
-    const file = imageInput.files[0];// On récupère le fichier choisi par l’utilisateur
-    if (!file) return;// S’il n’y a pas de fichier, on arrête
+imageInput.addEventListener("change", () => {
+    const file = imageInput.files[0];
+    if (!file) return;
 
-    const reader = new FileReader();// FileReader permet de lire un fichier image
+    const uploadZone = document.querySelector(".upload-zone");
 
-    reader.onload = function (event) {// Cette fonction s’exécute quand le fichier est lu
-        previewContainer.innerHTML = "";// On vide l’ancienne preview
+    // Nettoyer le contenu
+    uploadZone.innerHTML = "";
 
-        const img = document.createElement("img");// On crée une balise <img>
-        img.src = event.target.result;// src = contenu de l’image lue
-        img.style.maxWidth = "100%";// On limite la taille pour éviter les images trop grandes
+    const reader = new FileReader();
 
-        previewContainer.appendChild(img);// On affiche l’image dans la modale
+    reader.onload = function (event) {
+        const img = document.createElement("img");
+        img.src = event.target.result;
+
+        uploadZone.appendChild(img);
+        uploadZone.classList.add("has-image");
     };
 
-    reader.readAsDataURL(file);// On transforme le fichier en image lisible
+    reader.readAsDataURL(file);
 });
 
 // Envoi du formulaire
@@ -301,8 +286,24 @@ form.addEventListener("submit", function (event) {// On écoute l’envoi du for
         addWorkToModalGallery(newWork);// Ajout du projet dans la galerie de la modale
 
         form.reset();// Réinitialisation du formulaire
+        
+    const uploadZone = document.querySelector(".upload-zone");
+    uploadZone.innerHTML = `
+        <i class="fa-regular fa-image"></i>
 
-        previewContainer.innerHTML = "";// Suppression de la preview
+        <label for="image-upload" class="upload-btn">
+            + Ajouter photo
+        </label>
+        <input
+            type="file"
+            id="image-upload"
+            name="image"
+            accept="image/png, image/jpeg"
+            hidden
+        />
+
+        <p class="upload-info">jpg, png : 4mo max</p>
+    `;
         showGallery(); // retour à la galerie de la modale
     })
     // Gestion des erreurs
@@ -351,8 +352,12 @@ function addWorkToModalGallery(work) {
 
     // Bouton poubelle
     const deleteBtn = document.createElement("button");
-    deleteBtn.textContent = "🗑️";
     deleteBtn.classList.add("delete-btn");
+
+   const icon = document.createElement("i");
+    icon.classList.add("fa-solid", "fa-trash-can");
+
+    deleteBtn.appendChild(icon);
 
     // Suppression du projet au clic
     deleteBtn.addEventListener("click", () => {

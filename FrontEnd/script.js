@@ -70,13 +70,12 @@ function displayBouton (categories){
     //creation du bouton tous 
     const btnTous = document.createElement("button");
     btnTous.textContent = "tous";
-    btnTous.classList.add("active"); // actif par défaut
     filters.appendChild(btnTous); // on ajoute le bouton à la div des filtres
 
     //Ajouter le clic pour afficher tous le projet
      btnTous.addEventListener("click", () => {
-        setActiveButton(btnTous);
-        filterProjects(0); // // 0 signifie "afficher tous les projets" 
+        filterProjects(0); //0 signifie "afficher tous les projets" 
+        setActiveButton(btnTous);// ← le vert apparaît UNIQUEMENT au clic
     });
 
 
@@ -90,6 +89,7 @@ function displayBouton (categories){
     // Ajouter le clic pour filtrer les projets
         button.addEventListener("click", () => {
             filterProjects(categorie.id); // envoie l'id de la catégorie à la fonction de filtrage
+            setActiveButton(button);
         });
        
     })

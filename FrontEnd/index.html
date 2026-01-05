@@ -10,11 +10,10 @@
 	<meta name="description" content="">
 	<link rel="stylesheet" href="./assets/style.css">
 	<link rel="stylesheet" href="./assets/modal.css">
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"/>
 </head>
 <body>
 <header>
-	<!-- Bouton Modifier (visible uniquement si admin connecté) -->
-	<button class="btn-modifier">Modifier</button>
 	<h1>Sophie Bluel <span>Architecte d'intérieur</span></h1>
 	<nav>
 		<ul>
@@ -38,7 +37,15 @@
 		</article>
 	</section>
 	<section id="portfolio">
-		<h2>Mes Projets</h2>
+		<div class="h2btnmodif">
+			<h2>Mes Projets</h2>
+			<!-- Bouton Modifier (visible uniquement si admin connecté) -->
+			<button class="btn-modifier">
+			<i class="fa-regular fa-pen-to-square"></i>
+  			modifier
+			</button>
+		</div>
+		
 		<!-- Ajout pour les boutons dynamiquement -->
 		<div class="filters"></div>
 		
@@ -72,17 +79,17 @@
 
 <!-- class="modal-overlay" c’est le fond sombre -->
 <!-- style="display: none;" la modale est cachée au chargement, elle apparaîtra plus tard avec JavaScript--> 
-<div class="modal-overlay" style="display: none;">
+<div class="modal-overlay">
 
    <!-- Contenu réel de la modale -->	
   <div class="modal-content">
 
     <!-- Bouton fermer -->
     <button class="modal-close">✕</button>
-
+	 <button class="modal-back">←</button>
     <!-- Zone principale : galerie à modifier -->
     <div class="modal-zone modal-gallery">
-      <h3>Galerie Admin</h3>
+      <h3>Galerie photo</h3>
       <div class="modal-gallery-list">
         <!-- Ici, JS ajoutera les projets -->
       </div>
@@ -91,16 +98,41 @@
     </div>
 
     <!-- Zone formulaire (cachée par défaut) -->
-    <div class="modal-zone modal-form" style="display: none;">
-      <button class="modal-back">← Retour</button>
+    <div class="modal-zone modal-form">
+      <h3>Ajout photo</h3>
+      <form class="add-photo-form">
 
-      <h3>Ajouter un projet</h3>
-      <form>
-        <input type="file" name="image" />
-        <input type="text" name="title" placeholder="Titre du projet" />
-        <select name="category"></select>
-        <button type="submit">Valider</button>
-      </form>
+  	<!-- Zone upload image -->
+  	<div class="upload-zone">
+    	<i class="fa-regular fa-image"></i>
+
+    	<label for="image-upload" class="upload-btn">+ Ajouter photo</label>
+    	<input
+      		type="file"
+      		id="image-upload"
+      		name="image"
+      		accept="image/png, image/jpeg"
+      		hidden
+    	/>
+    	<p class="upload-info">jpg, png : 4mo max</p>
+  </div>
+
+  <!-- Titre -->
+  <label for="title">Titre</label>
+  <input type="text" name="title" id="title" />
+
+  <!-- Catégorie -->
+  <label for="category">Catégorie</label>
+  <select name="category" id="category"></select>
+
+  <hr />
+
+  <!-- Bouton valider -->
+  <button type="submit" class="submit-btn">
+    Valider
+  </button>
+
+</form>
     </div>
 
   </div>
