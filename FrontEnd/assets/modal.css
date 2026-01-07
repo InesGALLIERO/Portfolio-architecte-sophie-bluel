@@ -36,8 +36,23 @@
     right: 5px;
     border: none;
     background: none;
-    font-size: 0.5em;
+    font-size: 24px;   /* ← TAILLE icône */
+    font-weight: 600; /* ← plus visible */
     cursor: pointer;
+}
+.modal-back {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+}
+
+.modal-back i {
+    font-size: 22px;  /* taille proche maquette */
+    color: black;
 }
 
 /* =============================
@@ -131,7 +146,6 @@
     cursor: pointer;
 }
 
-
 /* =============================
    5. Formulaire
    ============================= */
@@ -150,7 +164,7 @@
 }
 
 .modal-form button[type="submit"] {
-    background-color: #1D6154;
+
     color: white;
     font-weight: bold;
     border: none;
@@ -184,6 +198,7 @@
 
     display: flex;
     align-items: center;
+    display: none;
     gap: 8px;              /* espace icône / texte */
 
     font-family: 'Work Sans', sans-serif;
@@ -296,7 +311,12 @@
     cursor: not-allowed;
 }
 
-.submit-btn:not(:disabled) {
-    background-color: #1D6154;
+.submit-btn.disabled {
+    background-color: #a7a7a7;
+    cursor: not-allowed;
+}
+
+.submit-btn.enabled {
+    background-color: #1d6154;
     cursor: pointer;
 }

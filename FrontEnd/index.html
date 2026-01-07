@@ -76,7 +76,6 @@
 <script src="modal.js" defer></script>
 
 <!-- Modale d’édition -->
-
 <!-- class="modal-overlay" c’est le fond sombre -->
 <!-- style="display: none;" la modale est cachée au chargement, elle apparaîtra plus tard avec JavaScript--> 
 <div class="modal-overlay">
@@ -85,8 +84,11 @@
   <div class="modal-content">
 
     <!-- Bouton fermer -->
-    <button class="modal-close">✕</button>
-	 <button class="modal-back">←</button>
+   <button class="modal-close">
+  		<i class="fa-solid fa-xmark"></i>
+	</button>
+
+	
     <!-- Zone principale : galerie à modifier -->
     <div class="modal-zone modal-gallery">
       <h3>Galerie photo</h3>
@@ -99,6 +101,10 @@
 
     <!-- Zone formulaire (cachée par défaut) -->
     <div class="modal-zone modal-form">
+		<button class="modal-back">
+    		<i class="fa-solid fa-arrow-left"></i>
+		</button>
+
       <h3>Ajout photo</h3>
       <form class="add-photo-form">
 
@@ -128,9 +134,9 @@
   <hr />
 
   <!-- Bouton valider -->
-  <button type="submit" class="submit-btn">
-    Valider
-  </button>
+  <button type="submit" class="submit-btn disabled" disabled>
+  Valider
+</button>
 
 </form>
     </div>

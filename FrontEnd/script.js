@@ -1,44 +1,93 @@
-// Sélection de la galerie dans le HTML
-// On sélectionne l'élément <div class="gallery"> où les projets seront affichés
+// ===============================
+// ÉTAPE 1 : VARIABLES GLOBALES
+// Ces variables sont utilisées dans tout le fichier
+// ===============================
+
+// On sélectionne la galerie principale dans le HTML
+// C’est ici que les projets seront affichés
 const gallery = document.querySelector(".gallery");
 
-// Fonction principale qui démarre tout
-async function getWorks() {
+// On sélectionne la div qui contient les boutons de filtres
+const filters = document.querySelector(".filters");
 
-    // 1. Récupérer les projets depuis l'API
+// Tableau qui va contenir TOUS les projets récupérés depuis l’API
+// On le garde en mémoire pour pouvoir filtrer plus tard
+let allProjects = [];
+
+
+// ===============================
+// ÉTAPE 2 : FONCTIONS API PARTAGÉES
+// Ces fonctions servent à communiquer avec le serveur (API)
+// ===============================
+
+// Fonction qui récupère tous les projets depuis l’API
+async function fetchWorks() {
+    // fetch envoie une requête à l’API pour demander les projets
     const response = await fetch("http://localhost:5678/api/works");
-    const projets = await response.json();
-        // fetch envoie une requête à l'API pour récupérer tous les projets
-        // .then(response => response.json()) transforme la réponse JSON en tableau d'objets JavaScript
 
-    // 2. Afficher les projets dans le DOM
-    allProjects = projets; // on garde tous les projets en mémoire
-    displayProjects(projets);
-     // On appelle la fonction displayProjects pour créer les éléments HTML et les ajouter à la galerie}
+    // On transforme la réponse du serveur en JavaScript (JSON)
+    return await response.json();
 }
-// Fonction d’affichage des projets
-function displayProjects(listeDeProjets) {
 
-    gallery.innerHTML = ""; // on vide la galerie avant d’ajouter les nouveaux projets
+// Fonction qui récupère toutes les catégories depuis l’API
+async function fetchCategories() {
+    // Requête vers l’API pour récupérer les catégories
+    const response = await fetch("http://localhost:5678/api/categories");
 
-    listeDeProjets.forEach(projet => {
-        // On parcourt chaque projet un par un
+    // Transformation de la réponse en tableau JavaScript
+    return await response.json();
+}
 
-        // Création des éléments
+// Fonction qui récupère le token stocké dans le navigateur
+// Le token permet de savoir si l’utilisateur est connecté
+function getToken() {
+    return localStorage.getItem("token");
+}
+
+
+// ===============================
+// ÉTAPE 3 : GALERIE PRINCIPALE
+// Affichage des projets sur la page d’accueil
+// ===============================
+
+// Fonction principale pour charger les projets
+async function getWorks() {
+    // On récupère tous les projets depuis l’API
+    allProjects = await fetchWorks();
+
+    // On affiche tous les projets dans la galerie
+    displayProjects(allProjects);
+}
+
+// Fonction qui affiche les projets dans le HTML
+function displayProjects(projects) {
+
+    // On vide la galerie avant d’ajouter les projets
+    // Cela évite les doublons
+    gallery.innerHTML = "";
+
+    // On parcourt chaque projet un par un
+    projects.forEach(project => {
+
+        // Création de la balise <figure> pour un projet
         const figure = document.createElement("figure");
-        figure.dataset.categoryId = projet.categoryId; 
-        figure.dataset.id = projet.id; //pour la suppression (étape 7)
-        // On stocke l'id de la catégorie dans l'attribut data-category-id
-        // Cela servira pour le filtrage plus tard
 
+        // On stocke l’id du projet dans le HTML (utile pour la suppression)
+        figure.dataset.id = project.id;
+
+        // On stocke l’id de la catégorie (utile pour le filtrage)
+        figure.dataset.categoryId = project.categoryId;
+
+        // Création de l’image du projet
         const img = document.createElement("img");
-        img.src = projet.imageUrl; // source de l'image
-        img.alt = projet.title; // texte alternatif pour l'image
+        img.src = project.imageUrl; // image venant de l’API
+        img.alt = project.title;    // texte alternatif (accessibilité)
 
+        // Création du titre du projet
         const caption = document.createElement("figcaption");
-        caption.textContent = projet.title; // titre du projet
+        caption.textContent = project.title;
 
-        // Construction : on met l'image et le titre dans le <figure>
+        // On ajoute l’image et le titre dans le <figure>
         figure.appendChild(img);
         figure.appendChild(caption);
 
@@ -47,133 +96,176 @@ function displayProjects(listeDeProjets) {
     });
 }
 
+// ===============================
+// FONCTION POUR CRÉER UN PROJET
+// DANS LA GALERIE PRINCIPALE
+// ===============================
 
-// Sélection des filtres dans le HTML
-const filters = document.querySelector(".filters")
-// On sélectionne l'élément <div class="filters"> où les boutons seront ajouté
+function createMainFigure(work) {
 
+    // Création de la balise <figure>
+    const figure = document.createElement("figure");
 
-// Récupérer les catégories depuis l'API
-function Categories(){
-    fetch("http://localhost:5678/api/categories")
-    .then(response => response.json())
-    .then(categories => {
-        console.log(categories); // pour vérifier dans la console que les catégories sont bien récupérées
-        displayBouton(categories); // on appelle la fonction pour créer les boutons de filtre 
-    });  
+    // On stocke les informations utiles dans le HTML
+    figure.dataset.id = work.id;
+    figure.dataset.categoryId = work.categoryId;
+
+    // Création de l’image
+    const img = document.createElement("img");
+    img.src = work.imageUrl;
+    img.alt = work.title;
+
+    // Création du titre
+    const caption = document.createElement("figcaption");
+    caption.textContent = work.title;
+
+    // Construction du <figure>
+    figure.appendChild(img);
+    figure.appendChild(caption);
+
+    // On retourne le <figure> prêt à être ajouté
+    return figure;
 }
-Categories(); // on lance la récupération des catégories
 
-//Fonction pour créer les boutons de filtre
-function displayBouton (categories){
 
-    //creation du bouton tous 
-    const btnTous = document.createElement("button");
-    btnTous.textContent = "tous";
-    filters.appendChild(btnTous); // on ajoute le bouton à la div des filtres
+// ===============================
+// ÉTAPE 4 : FILTRES PAR CATÉGORIE
+// Création et gestion des boutons de filtres
+// ===============================
 
-    //Ajouter le clic pour afficher tous le projet
-     btnTous.addEventListener("click", () => {
-        filterProjects(0); //0 signifie "afficher tous les projets" 
-        setActiveButton(btnTous);// ← le vert apparaît UNIQUEMENT au clic
+// Fonction qui crée les boutons de filtres
+function displayButtons(categories) {
+
+    // On vide les filtres avant d’en ajouter
+    filters.innerHTML = "";
+
+    // Création du bouton "Tous"
+    const btnAll = document.createElement("button");
+    btnAll.textContent = "Tous";
+
+    // On met le bouton "Tous" actif par défaut
+    btnAll.classList.add("active");
+
+    // On ajoute le bouton dans la div des filtres
+    filters.appendChild(btnAll);
+
+    // Au clic sur "Tous", on affiche tous les projets
+    btnAll.addEventListener("click", () => {
+        displayProjects(allProjects);
+        setActiveButton(btnAll);
     });
 
+    // Création d’un bouton pour chaque catégorie
+    categories.forEach(category => {
 
-    //Création des boutons pour chaque catégorie 
-    categories.forEach(categorie => {
         const button = document.createElement("button");
-        button.textContent = categorie.name; // nom de la catégorie
-        filters.appendChild(button);  // ajout du bouton à la div des filtres
+        button.textContent = category.name; // nom de la catégorie
 
-    
-    // Ajouter le clic pour filtrer les projets
+        // Ajout du bouton dans la div des filtres
+        filters.appendChild(button);
+
+        // Filtrage des projets au clic
         button.addEventListener("click", () => {
-            filterProjects(categorie.id); // envoie l'id de la catégorie à la fonction de filtrage
+
+            // On filtre les projets selon l’id de la catégorie
+            const filtered = allProjects.filter(project => {
+                return project.categoryId === category.id;
+            });
+
+            // On affiche uniquement les projets filtrés
+            displayProjects(filtered);
+
+            // On met le bouton actif
             setActiveButton(button);
         });
-       
-    })
+    });
 }
-function setActiveButton(activeButton) { //on crée une foncton, activeButton : le bouto sur lequel l’utilisateur vient de cliquer
-    const buttons = document.querySelectorAll(".filters button");//On sélectionne tous les boutons qui se trouvent dans la div .filters
-    //querySelectorAll retourne une liste de boutons (Tous, Objets, Appartements, etc.)
 
-    buttons.forEach(button => { //On parcourt chaque bouton, un par un, button représente un bouton à la fois
-        button.classList.remove("active");//On enlève la classe active à tous les boutons,Ça permet de s’assurer qu’aucun bouton n’est actif avant d’en choisir un nouveau
+// Fonction pour gérer le bouton actif (style CSS)
+function setActiveButton(activeButton) {
+
+    // On sélectionne tous les boutons de filtres
+    const buttons = document.querySelectorAll(".filters button");
+
+    // On enlève la classe active de tous les boutons
+    buttons.forEach(btn => {
+        btn.classList.remove("active");
     });
 
-    activeButton.classList.add("active");//Ça permet de s’assurer qu’aucun bouton n’est actif avant d’en choisir un nouveau,Ce bouton devient visuellement sélectionné (fond vert, texte blanc)
+    // On ajoute la classe active au bouton cliqué
+    activeButton.classList.add("active");
 }
 
-// Fonction pour filtrer les projets affichés
 
-function filterProjects(categoryId) {
+// ===============================
+// ÉTAPE 5 : MODE ADMIN
+// Affichage des éléments réservés à l’admin
+// ===============================
 
-    // Cas 1 : bouton "Tous"
-    if (categoryId === 0) {
-        displayProjects(allProjects);
-        return;
-    }
+// On récupère le token pour savoir si l’utilisateur est connecté
+const token = getToken();
 
-    // Cas 2 : filtrer par catégorie
-    const projetsFiltres = allProjects.filter(projet => {
-        return projet.categoryId === categoryId;
-    });
-
-    // Afficher uniquement les projets filtrés
-    displayProjects(projetsFiltres);
-}
-
-// Lancer le programme
-
-getWorks();
-
-// on rappelle getWorks() pour s'assurer que les projets s'affichent au chargement
-
-
-// Vérifier si l'utilisateur est connecté
-//localStorage = mémoie du navigateur // "token" le nom sous lequel on a sauvegarder le token 
-// cette ligne récupère le token s’il existe sinon elle renvoie null
-// token = clé secrete donnée par le serveur quand l'utilisateur se connecte 
-const token = localStorage.getItem("token");
-
-// si token existe => l'utilisateur est connecte si le token n'existe pas on ne fait rien 
+// Si le token existe, alors l’utilisateur est connecté
 if (token) {
-    // 1. Cacher les filtres
-    //on cherche la div qui contient les boutons de filtres
-    const filters = document.querySelector(".filters");
 
-    if (filters) { //on vérifie que la div existe 
-        filters.style.display = "none"; // on cache les filtres, en mode admin les filtres ne doivent pas s'afficher
+    // On cache les filtres (non visibles en mode admin)
+    if (filters) {
+        filters.style.display = "none";
     }
 
-    // 2. Changer "login" en "logout"
-    const loginLink = document.querySelector('a[href="login.html"]'); //selection du lien qui méne à lapage login
-    if (loginLink) { // on vérifie qu'il existe 
-        loginLink.textContent = "logout"; // on change le texte du lien, l'utilisateur voit maintenant logout
+    // On sélectionne le lien "login"
+    const loginLink = document.querySelector('a[href="login.html"]');
 
-        // 3. Gérer la déconnexion
-        loginLink.addEventListener("click", (event) => { //on écoute le clic sur logout
-            event.preventDefault(); // empêce d'aller sur la page login 
-            localStorage.removeItem("token"); // suppression du token, l'utilisateur est déconnecté 
-            window.location.reload(); // on recharge la page, il n'y a plus de token donc les filtres reviennent, logout redevient login le mode édition disparait
+    if (loginLink) {
+
+        // On change le texte "login" en "logout"
+        loginLink.textContent = "logout";
+
+        // Gestion de la déconnexion
+        loginLink.addEventListener("click", (e) => {
+            e.preventDefault(); // empêche la redirection
+            localStorage.removeItem("token"); // suppression du token
+            window.location.reload(); // recharge la page
         });
     }
 
-    // 4. Afficher le bandeau "mode édition"
-    const header = document.querySelector("header"); //on récupère le header du site 
+    // Création du bandeau "Mode édition"
+    const header = document.querySelector("header");
+    const banner = document.createElement("div");
 
-    const editBanner = document.createElement("div"); //on crée une nouvelle div
-    editBanner.textContent = "Mode édition"; //Texte affiché 
-    editBanner.style.backgroundColor = "black"; //fond noir
-    editBanner.style.color = "white"; //texte blanc
-    editBanner.style.textAlign = "center"; //centré
-    editBanner.style.padding = "10px";
+    banner.innerHTML = `
+        <i class="fa-regular fa-pen-to-square"></i>
+        <span>Mode édition</span>
+    `;
 
-    document.body.insertBefore(editBanner, header); //On place le bandeau au-dessus du header
-    // 5. AFFICHER LE BOUTON "MODIFIER"
-    const editButton = document.querySelector(".btn-modifier");
-    if (editButton) {
-        editButton.style.display = "block";
+    // Styles du bandeau
+    banner.style.cssText = `
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 10px;
+        background: black;
+        color: white;
+        padding: 10px;
+    `;
+
+    // On ajoute le bandeau au-dessus du header
+    document.body.insertBefore(banner, header);
+
+    // Affichage du bouton "Modifier"
+    const editBtn = document.querySelector(".btn-modifier");
+    if (editBtn) {
+        editBtn.style.display = "block";
     }
 }
+
+
+// ===============================
+// ÉTAPE 6 : LANCEMENT DU SCRIPT
+// ===============================
+
+// Chargement des catégories et création des filtres
+fetchCategories().then(displayButtons);
+
+// Chargement et affichage des projets
+getWorks();

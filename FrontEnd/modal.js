@@ -1,362 +1,112 @@
-//Une modal est une fenêtre qui s'ouvre par dessus la page, le reste de la page devient grisé/bloqué
+// ÉTAPE 1 : SÉLECTION DES ÉLÉMENTS HTML
+// On récupère tous les éléments nécessaires au fonctionnement de la modale
 
-// Sélection des éléments
-const openModalBtn = document.querySelector(".btn-modifier"); //bouton "Modifier",quand on cliquera dessus = la modale s'ouvrira
-const closeModalBtn = document.querySelector(".modal-close"); //on récupère le bouton croix, il sert à fermer la modale
-const modalOverlay = document.querySelector(".modal-overlay"); // fond sombre + modale entière
+// Fond sombre + contenu de la modale
+const modalOverlay = document.querySelector(".modal-overlay");
 
-const gallerySection = document.querySelector(".modal-gallery"); // zone galerie admin dans la modale (liste des projet miniatures)
-const formSection = document.querySelector(".modal-form"); // zone formulaire, sert à ajouter un nouveau projet
-const addPhotoBtn = document.querySelector(".modal-show-form"); // bouton "Ajouter une photo", il sert à passer de la galerie au fomulaire 
-const backBtn = document.querySelector(".modal-back"); // flèche retour vers la galerie, sert à revenir du formulaire vers la galerie
+// Bouton "Modifier" (ouvre la modale)
+const openModalBtn = document.querySelector(".btn-modifier");
 
-// ------------------------
-// Fonctions pour ouvrir/fermer/bascule
-// ------------------------
+// Bouton croix (ferme la modale)
+const closeModalBtn = document.querySelector(".modal-close");
 
-// Fermer la modale
-function closeModal() { //fonction pour fermer la modale 
-    modalOverlay.style.display = "none"; // cacher la modale (fond sombre + modale)
-    modalOverlay.classList.remove("active");
-}
+// Section galerie dans la modale (liste des projets)
+const gallerySection = document.querySelector(".modal-gallery");
 
-// Afficher le formulaire et cacher la galerie
-function showForm() { // fonction appelée quand on clique sur Ajouter une photo
-    gallerySection.style.display = "none"; // on cache la galerie
-    formSection.style.display = "block"; // on affiche le formulaire 
-}
+// Section formulaire (ajout d’un projet)
+const formSection = document.querySelector(".modal-form");
 
-// Retourner à la galerie
-function showGallery() { //fonction appelée quand on clique sur la fléche retour 
-    gallerySection.style.display = "block"; // on réaffiche la galerie 
-    formSection.style.display = "none"; // On cache le formulaire
-}
+// Bouton "Ajouter une photo" (passe de la galerie au formulaire)
+const addPhotoBtn = document.querySelector(".modal-show-form");
 
-// ------------------------
-// Événements
-// ------------------------
+// Flèche retour (revient du formulaire vers la galerie)
+const backBtn = document.querySelector(".modal-back");
 
-// Clic sur le bouton "Modifier" pour ouvrir la modale
-openModalBtn.addEventListener("click", openModal); // quand on clique sur modifier, on appelle openModal
-
-// Clic sur la croix pour fermer
-closeModalBtn.addEventListener("click", closeModal); // cliquer sur la croix = la modale se ferme 
-
-// Clic sur le fond sombre pour fermer
-modalOverlay.addEventListener("click", function(event) {
-    // On ne ferme la modale que si on clique sur le fond et pas sur le contenu
-    if (event.target === modalOverlay) {
-        closeModal();
-    }
-});
-
-// Clic sur "Ajouter une photo" pour afficher le formulaire
-addPhotoBtn.addEventListener("click", showForm);
-
-// Clic sur la flèche retour pour revenir à la galerie
-backBtn.addEventListener("click", showGallery);
-
-
-
-
-//étape 7 supprimez des travaux existants 
-//1.Récupérer les projets dans la modale
-// Zone où on affichera les projets dans la modale
+// Conteneur qui affiche les projets dans la modale
 const modalGalleryList = document.querySelector(".modal-gallery-list");
-// Fonction pour charger les projets dans la modale On crée une fonction elle s’exécutera quand on l’appellera (ex : à l’ouverture de la modale)
-function loadModalWorks() {
-    //fetch envoie une requête à l'API "donne-moi la liste de tous les projets" C’est la même API que pour la galerie principale
-    fetch("http://localhost:5678/api/works")
-        .then(response => response.json()) //Quand l’API répond, la réponse arrive sous forme brute, .json() la transforme en objet JavaScript
-        .then(works => { //works est la liste des projets reçus, c'est un tableau de projets
-            displayModalWorks(works); //On envoie la liste des projets à une autre fonction, cette fonction va crée le HTML et afficher les projets dans la modale 
-        });
-}
-//2.Afficher chaque projet avec une poubelle
-function displayModalWorks(works) { //On crée une fonction, works est la liste des projets 
-    modalGalleryList.innerHTML = ""; // On vide la modale avant d’ajouter les projets
 
-    works.forEach(work => { //On parcourt chaque projet un par un
-        const item = document.createElement("div");// on crée une div elle représentera un projet dans la modale
-        item.classList.add("modal-item");//On ajoute une clase CSS, pour le style (taille, position, etc.)
-        item.dataset.id = work.id; // stocke l’id du projet dans le HTML
 
-        const img = document.createElement("img");//on crée une image 
-        img.src = work.imageUrl;//On met l'image du projet dedans
-        img.alt = work.title;//Texte alternatif(accessibilité)
+// ÉTAPE 2 : OUVERTURE / FERMETURE DE LA MODALE
+// Fonctions pour afficher ou cacher la modale
 
-        const deleteBtn = document.createElement("button");
-        deleteBtn.classList.add("delete-btn");
-
-       const icon = document.createElement("i");
-        icon.classList.add("fa-solid", "fa-trash-can");
-
-        deleteBtn.appendChild(icon);
-
-        // clic sur la poubelle
-        deleteBtn.addEventListener("click", () => { //On écoute le clic sur la poubelle
-            deleteWork(work.id, item); //On appelle une fonction deleteWork, work.id => l'id du projet à supp, item => l'élément HTML à enlever du DOM
-        });
-
-        item.appendChild(img);// On met l'image dans la div du projet
-        item.appendChild(deleteBtn);//On met la poubelle dans la div
-        modalGalleryList.appendChild(item);//On ajoute le projet dans la modale
-    });
-}
-
-// 3. Supprimer le projet via l’API (DELETE)
-// DELETE /works/{id}
-function deleteWork(workId, domElement) { 
-    // On crée une fonction deleteWork
-    // workId = l’id du projet à supprimer
-    // domElement = l’élément HTML à retirer de la page
-
-    const token = localStorage.getItem("token"); 
-    // On récupère le token stocké dans le localStorage
-    // Le token prouve que l'utilisateur est connecté (admin)
-
-    fetch(`http://localhost:5678/api/works/${workId}`, {
-        // On envoie une requête vers l’API
-        // ${workId} permet de viser exactement le projet à supprimer
-
-        method: "DELETE", 
-        // DELETE = méthode HTTP pour supprimer une donnée
-
-        headers: {
-            Authorization: `Bearer ${token}` 
-            // On envoie le token dans les headers
-            // "Bearer" signifie : "voici mon autorisation"
-        }
-    })
-    .then(response => {
-        // On récupère la réponse du serveur
-
-        if (!response.ok) {
-            // Si la suppression a échoué
-            throw new Error("Erreur lors de la suppression");
-            // On déclenche une erreur
-        }
-
-        // Si la suppression a réussi :
-
-        domElement.remove(); 
-        // On supprime le projet de la modale (DOM)
-
-        removeFromMainGallery(workId); 
-        // On supprime aussi le projet de la galerie principale
-    })
-    .catch(error => {
-        // Si une erreur survient (token invalide, serveur, etc.)
-
-        alert(error.message); 
-        // On affiche un message d’erreur à l’utilisateur
-    });
-}
-// 4. Supprimer aussi dans la galerie principale
-function removeFromMainGallery(workId) {
-    // On crée une fonction removeFromMainGallery
-    // workId = l’id du projet qui vient d’être supprimé côté API
-
-    const figures = document.querySelectorAll(".gallery figure");
-    // On sélectionne toutes les balises <figure> dans la galerie principale
-    // Chaque <figure> représente un projet affiché sur la page
-
-    figures.forEach(figure => {
-        // On parcourt chaque figure une par une
-
-        if (figure.dataset.id == workId) {
-            // On compare l’id stocké dans le HTML (data-id)
-            // avec l’id du projet supprimé
-
-            figure.remove();
-            // Si les ids correspondent :
-            // → on supprime ce projet du DOM (de la page)
-        }
-    });
-}
-// 5. Charger la modale quand elle s’ouvre
+// Fonction pour ouvrir la modale
 function openModal() {
-   modalOverlay.style.display = "block";
-    modalOverlay.classList.add("active");
 
+    // On affiche la modale
+    modalOverlay.style.display = "block";
+
+    // On affiche la galerie par défaut
     gallerySection.style.display = "block";
+
+    // On cache le formulaire
     formSection.style.display = "none";
 
+    // On charge les projets dans la modale
     loadModalWorks();
 }
 
-//étape 8 ajout d'un projet
+// Fonction pour fermer la modale
+function closeModal() {
 
-// Sélection des éléments du formulaire
-const form = document.querySelector(".modal-form form"); 
-// On récupère le formulaire d’ajout de projet dans la modale
-const imageInput = form.querySelector('input[type="file"]'); 
-// Champ pour sélectionner une image
-const titleInput = form.querySelector('input[name="title"]'); 
-// Champ pour le titre du projet
-const categorySelect = form.querySelector('select[name="category"]'); 
-// Liste déroulante des catégories
-
-
-// Récupérer les catégories depuis l'API 
-function loadCategories() { //Cette fonction sert à récupérer la liste des catégories
-    fetch("http://localhost:5678/api/categories") // fetch envoie une requête à l’API pour demander les catégories
-        .then(response => response.json())//Quand l’API répond, la réponse arrive au format "brut",.json() permet de transformer cette réponse en objet JavaScript
-        .then(categories => {//"categories" est maintenant un tableau de catégories
-            categorySelect.innerHTML = "";// On vide le select avant d’ajouter
-            
-            categories.forEach(category => {// On parcourt chaque catégorie une par une
-                const option = document.createElement("option");// On crée une balise <option> pour le <select>
-                option.value = category.id; // // value = id de la catégorie (ce que l’API attend)
-                option.textContent = category.name; // Texte affiché à l’utilisateur
-                categorySelect.appendChild(option);  // On ajoute l’option dans le select
-            });
-        });
+    // On cache complètement la modale
+    modalOverlay.style.display = "none";
 }
-loadCategories();// On appelle la fonction pour charger les catégories dès le chargement
 
-// Preview de l’image sélectionnée
-// ------------------------
-imageInput.addEventListener("change", () => {
-    const file = imageInput.files[0];
-    if (!file) return;
+// Fonction pour afficher le formulaire d’ajout
+function showForm() {
 
-    const uploadZone = document.querySelector(".upload-zone");
+    // On cache la galerie
+    gallerySection.style.display = "none";
 
-    // Nettoyer le contenu
-    uploadZone.innerHTML = "";
-
-    const reader = new FileReader();
-
-    reader.onload = function (event) {
-        const img = document.createElement("img");
-        img.src = event.target.result;
-
-        uploadZone.appendChild(img);
-        uploadZone.classList.add("has-image");
-    };
-
-    reader.readAsDataURL(file);
-});
-
-// Envoi du formulaire
-// ------------------------
-form.addEventListener("submit", function (event) {// On écoute l’envoi du formulaire
-    event.preventDefault();// Empêche le rechargement de la page
-
-    // Récupération des valeurs du formulaire
-    const image = imageInput.files[0];
-    const title = titleInput.value.trim();// trim enlève les espaces inutiles
-    const category = categorySelect.value;
-
-    // Vérification : tous les champs doivent être remplis
-    if (!image || !title || !category) {
-        alert("Veuillez remplir tous les champs");
-        return;
-    }
-
-    const token = localStorage.getItem("token");// On récupère le token de l’utilisateur connecté
-    
-
-    const formData = new FormData();// FormData permet d’envoyer des fichiers
-
-     // On ajoute chaque information attendue par l’API
-    formData.append("image", image);
-    formData.append("title", title);
-    formData.append("category", category);
-
-    fetch("http://localhost:5678/api/works", {// Envoi des données vers l’API
-        method: "POST",// POST = ajouter un nouvel élément
-        headers: {
-            Authorization: `Bearer ${token}`// Autorisation avec le token (obligatoire)
-        },
-        body: formData
-    })
-    // Vérification de la réponse du serveur
-    .then(response => {
-        if (!response.ok) {
-            throw new Error("Erreur lors de l’ajout");
-        }
-        // On transforme la réponse en objet JavaScript
-        return response.json();
-    })
-    .then(newWork => {
-        // Étape 8.2 → mise à jour dynamique
-        addWorkToMainGallery(newWork);// Ajout du projet dans la galerie principale
-        addWorkToModalGallery(newWork);// Ajout du projet dans la galerie de la modale
-
-        form.reset();// Réinitialisation du formulaire
-        
-    const uploadZone = document.querySelector(".upload-zone");
-    uploadZone.innerHTML = `
-        <i class="fa-regular fa-image"></i>
-
-        <label for="image-upload" class="upload-btn">
-            + Ajouter photo
-        </label>
-        <input
-            type="file"
-            id="image-upload"
-            name="image"
-            accept="image/png, image/jpeg"
-            hidden
-        />
-
-        <p class="upload-info">jpg, png : 4mo max</p>
-    `;
-        showGallery(); // retour à la galerie de la modale
-    })
-    // Gestion des erreurs
-    .catch(error => {
-        alert(error.message);
-    });
-});
-
-function addWorkToMainGallery(work) {
-    const gallery = document.querySelector(".gallery");// On récupère la galerie principale
-
-    const figure = document.createElement("figure");// Création de la balise <figure>
-
-    // On stocke les informations utiles dans le HTML
-    figure.dataset.id = work.id;
-    figure.dataset.categoryId = work.categoryId;
-
-    // Création de l’image
-    const img = document.createElement("img");
-    img.src = work.imageUrl;
-    img.alt = work.title;
-
-    // Création du titre
-    const caption = document.createElement("figcaption");
-    caption.textContent = work.title;
-
-    // Construction du <figure>
-    figure.appendChild(img);
-    figure.appendChild(caption);
-
-    // Ajout à la galerie
-    gallery.appendChild(figure);
+    // On affiche le formulaire
+    formSection.style.display = "block";
 }
-// Ajouter le projet dans la galerie de la modale
-function addWorkToModalGallery(work) {
+
+// Fonction pour revenir à la galerie
+function showGallery() {
+
+    // On affiche la galerie
+    gallerySection.style.display = "block";
+
+    // On cache le formulaire
+    formSection.style.display = "none";
+}
+
+
+// ÉTAPE 3 : GALERIE DES PROJETS DANS LA MODALE
+// Chargement et affichage des projets avec une icône poubelle
+
+// Fonction pour charger les projets dans la modale
+function loadModalWorks() {
+
+    // On récupère les projets depuis l’API
+    fetchWorks().then(displayModalWorks);
+}
+
+// Fonction qui crée UN projet dans la modale (HTML)
+function createModalItem(work) {
 
     // Création du conteneur du projet
     const item = document.createElement("div");
     item.classList.add("modal-item");
+
+    // On stocke l’id du projet dans le HTML
     item.dataset.id = work.id;
 
-    // Image du projet
+    // Création de l’image du projet
     const img = document.createElement("img");
     img.src = work.imageUrl;
     img.alt = work.title;
 
-    // Bouton poubelle
+    // Création du bouton de suppression
     const deleteBtn = document.createElement("button");
     deleteBtn.classList.add("delete-btn");
 
-   const icon = document.createElement("i");
+    // Icône poubelle
+    const icon = document.createElement("i");
     icon.classList.add("fa-solid", "fa-trash-can");
 
+    // On met l’icône dans le bouton
     deleteBtn.appendChild(icon);
 
     // Suppression du projet au clic
@@ -364,10 +114,219 @@ function addWorkToModalGallery(work) {
         deleteWork(work.id, item);
     });
 
-    // Construction du bloc
+    // Construction du projet dans la modale
     item.appendChild(img);
     item.appendChild(deleteBtn);
 
-    // Ajout dans la galerie de la modale
-    modalGalleryList.appendChild(item);
+    return item;
 }
+
+// Fonction qui affiche tous les projets dans la modale
+function displayModalWorks(works) {
+
+    // On vide la galerie avant d’ajouter les projets
+    modalGalleryList.innerHTML = "";
+
+    // On ajoute chaque projet dans la modale
+    works.forEach(work => {
+        modalGalleryList.appendChild(createModalItem(work));
+    });
+}
+
+// ÉTAPE 4 : SUPPRESSION D’UN PROJET
+// Suppression côté API + mise à jour de l’interface
+
+// Fonction pour supprimer un projet
+function deleteWork(id, element) {
+
+    // Envoi de la requête DELETE vers l’API
+    fetch(`http://localhost:5678/api/works/${id}`, {
+        method: "DELETE",
+        headers: {
+            Authorization: `Bearer ${getToken()}`
+        }
+    })
+    .then(response => {
+
+        // Si la suppression échoue
+        if (!response.ok) {
+            throw new Error("Erreur lors de la suppression");
+        }
+
+        // Suppression du projet dans la modale
+        element.remove();
+
+        // Suppression du projet dans la galerie principale
+        const figure = document.querySelector(`figure[data-id="${id}"]`);
+        if (figure) {
+            figure.remove();
+        }
+    })
+    .catch(error => {
+        alert(error.message);
+    });
+}
+
+// ÉTAPE 5 : AJOUT D’UN NOUVEAU PROJET
+// Gestion du formulaire d’ajout
+
+// Sélection du formulaire d’ajout
+const form = document.querySelector(".add-photo-form");
+
+// Champ image
+const imageInput = form.querySelector('input[type="file"]');
+
+// Champ titre
+const titleInput = form.querySelector('input[name="title"]');
+
+// Liste déroulante des catégories
+const categorySelect = form.querySelector('select[name="category"]');
+
+// Bouton valider
+const submitBtn = form.querySelector(".submit-btn");
+
+// PRÉVISUALISATION DE L’IMAGE
+// ===============================
+
+imageInput.addEventListener("change", () => {
+
+    // On récupère le fichier sélectionné
+    const file = imageInput.files[0];
+
+    // Si aucun fichier n’est sélectionné, on arrête
+    if (!file) return;
+
+    // Zone d’upload dans le formulaire
+    const uploadZone = form.querySelector(".upload-zone");
+
+    // On vide l’icône + bouton
+    uploadZone.innerHTML = "";
+
+    // Création de l’image
+    const img = document.createElement("img");
+
+    // Affichage temporaire de l’image
+    img.src = URL.createObjectURL(file);
+
+    // Ajout dans la zone
+    uploadZone.appendChild(img);
+
+    // Activation du style CSS
+    uploadZone.classList.add("has-image");
+
+    // On vérifie le formulaire
+    checkForm();
+});
+
+// Le bouton est désactivé par défaut
+submitBtn.disabled = true;
+
+// Fonction qui vérifie si le formulaire est valide
+function checkForm() {
+
+    // Vérification des champs
+    const imageOk = imageInput.files.length > 0;
+    const titleOk = titleInput.value.trim() !== "";
+    const categoryOk = categorySelect.value !== "";
+
+     // Si tout est valide
+    if (imageOk && titleOk && categoryOk) {
+
+        // Activation du bouton
+        submitBtn.disabled = false;
+
+        // Changement du style (bouton vert)
+        submitBtn.classList.remove("disabled");
+        submitBtn.classList.add("enabled");
+
+    } else {
+
+        // Désactivation du bouton
+        submitBtn.disabled = true;
+
+        // Bouton gris
+        submitBtn.classList.remove("enabled");
+        submitBtn.classList.add("disabled");
+    }
+}
+
+// Vérification du formulaire à chaque changement
+imageInput.addEventListener("change", checkForm);
+titleInput.addEventListener("input", checkForm);
+categorySelect.addEventListener("change", checkForm);
+
+// Chargement des catégories dans le select
+fetchCategories().then(categories => {
+
+    // Option vide par défaut
+    categorySelect.innerHTML = `<option value=""></option>`;
+
+    // Ajout des catégories dans le select
+    categories.forEach(category => {
+        const option = document.createElement("option");
+        option.value = category.id;
+        option.textContent = category.name;
+        categorySelect.appendChild(option);
+    });
+});
+
+// Envoi du formulaire
+form.addEventListener("submit", (e) => {
+    e.preventDefault();
+
+    // Création de l’objet FormData
+    const formData = new FormData();
+    formData.append("image", imageInput.files[0]);
+    formData.append("title", titleInput.value);
+    formData.append("category", categorySelect.value);
+
+    // Envoi vers l’API
+    fetch("http://localhost:5678/api/works", {
+        method: "POST",
+        headers: {
+            Authorization: `Bearer ${getToken()}`
+        },
+        body: formData
+    })
+    .then(response => response.json())
+    .then(work => {
+
+        // Ajout du projet dans la galerie principale
+        document.querySelector(".gallery")
+            .appendChild(createMainFigure(work));
+
+        // Ajout du projet dans la modale
+        modalGalleryList.appendChild(createModalItem(work));
+
+        // Réinitialisation du formulaire
+        form.reset();
+        submitBtn.disabled = true;
+
+        // Retour à la galerie de la modale
+        showGallery();
+    });
+});
+
+
+// ===============================
+// ÉTAPE 6 : GESTION DES ÉVÉNEMENTS
+// ===============================
+
+// Ouvrir la modale
+openModalBtn.addEventListener("click", openModal);
+
+// Fermer la modale avec la croix
+closeModalBtn.addEventListener("click", closeModal);
+
+// Passer au formulaire
+addPhotoBtn.addEventListener("click", showForm);
+
+// Retour à la galerie
+backBtn.addEventListener("click", showGallery);
+
+// Fermer la modale en cliquant sur le fond sombre
+modalOverlay.addEventListener("click", (e) => {
+    if (e.target === modalOverlay) {
+        closeModal();
+    }
+});
