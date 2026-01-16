@@ -199,15 +199,18 @@ imageInput.addEventListener("change", () => {
     // Zone d’upload dans le formulaire
     const uploadZone = form.querySelector(".upload-zone");
 
-    // On vide l’icône + bouton
-    uploadZone.innerHTML = "";
-
     // Création de l’image
     const img = document.createElement("img");
 
     // Affichage temporaire de l’image
     img.src = URL.createObjectURL(file);
 
+    // Nettoyage de l’ancienne image si elle existe
+    const existingImg = uploadZone.querySelector("img");
+    if (existingImg) {
+        existingImg.remove();
+    }
+    
     // Ajout dans la zone
     uploadZone.appendChild(img);
 
